@@ -8,6 +8,8 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "super-secret-key")
 
+CORS(app)
+
 DB_FILE = "users.json"
 
 
