@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import hashlib
 import json
+from flask_cors import CORS
 import os
 from datetime import datetime, timedelta
 from functools import wraps
