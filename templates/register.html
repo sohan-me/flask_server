@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Register User</title>
+    <style>
+      body {
+        background: #111;
+        color: white;
+        font-family: sans-serif;
+        text-align: center;
+        padding-top: 60px;
+      }
+      input,
+      button {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        width: 250px;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      .status-success {
+        color: #4caf50;
+      }
+      .status-error {
+        color: #f44336;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Register Device</h2>
+    {% if message %}
+      <p class="{{ 'status-success' if 'successful' in message else 'status-error' }}">{{ message }}</p>
+    {% endif %}
+    <form method="post" id="registerForm">
+      <input name="username" placeholder="Enter User Name" required />
+
+      <!-- Hidden inputs to be filled dynamically -->
+      <input type="hidden" name="timezone" id="timezone" />
+      <input type="hidden" name="user_agent" id="user_agent" />
+      <input type="hidden" name="display_width" id="display_width" />
+      <input type="hidden" name="display_height" id="display_height" />
+      <input type="hidden" name="screenSize" id="screenSize" />
+
+      <button type="submit">Register</button>
+    </form>
+
+    <p>After registration, please contact admin to activate your account.</p>
+
+    <script>
+      document.getElementById("registerForm").addEventListener("submit", () => {
+        // Fill hidden inputs with client info
+        document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+        document.getElementById("user_agent").value = navigator.userAgent || "";
+        document.getElementById("display_width").value = window.screen.width || "";
+        document.getElementById("display_height").value = window.screen.height || "";
+        document.getElementById("screenSize").value = `${window.screen.width}x${window.screen.height}` || "";
+      });
+    </script>
+  </body>
+</html>

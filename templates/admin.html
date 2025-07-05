@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Login</title>
+    <style>
+      body {
+        background: #111;
+        color: white;
+        font-family: sans-serif;
+        text-align: center;
+        padding-top: 60px;
+      }
+      input,
+      button {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        width: 250px;
+      }
+      button {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      .status-error {
+        color: #f44336;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Admin Login</h2>
+    {% if message %}
+      <p class="status-error">{{ message }}</p>
+    {% endif %}
+    <form method="post">
+      <input name="username" placeholder="Username" required />
+      <input name="password" type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  </body>
+</html>

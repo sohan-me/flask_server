@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Dashboard</title>
+    <style>
+      body {
+        background: #111;
+        color: white;
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th, td {
+        border: 1px solid white;
+        padding: 8px;
+        text-align: center;
+      }
+      button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .activate-btn {
+        background-color: #4caf50;
+        color: white;
+      }
+      .deactivate-btn {
+        background-color: #f44336;
+        color: white;
+      }
+      a.logout {
+        color: white;
+        float: right;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="{{ url_for('admin_logout') }}" class="logout">Logout</a>
+    <h2>Admin Dashboard - User Management</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Signature</th>
+          <th>Screen Size</th>
+          <th>Registered At</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.signature }}</td>
+          <td>{{ user.screenSize }}</td>
+          <td>{{ user.created }}</td>
+          <td>{{ user.expires or '-' }}</td>
+          <td>{{ 'Active' if user.active else 'Inactive' }}</td>
+          <td>
+            <form action="{{ url_for('admin_toggle_user', signature=user.signature) }}" method="post" style="display:inline;">
+              <button type="submit" class="{{ 'deactivate-btn' if user.active else 'activate-btn' }}">
+                {{ 'Deactivate' if user.active else 'Activate' }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
