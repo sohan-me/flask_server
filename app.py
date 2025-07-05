@@ -160,7 +160,7 @@ def admin_toggle_user(signature):
         db["users"][signature]["expires"] = None
 
     save_db(db)
-    return jsonify({"success": True, "new_status": new_status})
+    return redirect(url_for("admin_dashboard"))
 
 
 # Admin logout

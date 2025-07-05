@@ -1,0 +1,69 @@
+javascript:(function(){
+    function verifyDevice(callback) {
+        const payload = {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+            user_agent: navigator.userAgent || "",
+            display_width: window.screen.width || "",
+            display_height: window.screen.height || "",
+            screenSize: `${window.screen.width}x${window.screen.height}`
+        };
+
+        fetch("https://flask-server-clzh.onrender.com/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("✅ Device verified. Running loader...");
+                callback(); // Run loader script
+            } else {
+                console.warn("❌ Device not verified:", data.message);
+                alert("Device not verified: " + data.message + "\nPlease contact admin.");
+            }
+        })
+        .catch(err => {
+            console.error("Verification failed:", err);
+            alert("Unable to verify device. Check your connection.");
+        });
+    }
+
+    function initLoader() {
+        // 🔥 🔥 🔥 Paste your **full original loader code** here.
+        // For example:
+        const existingPanel = document.getElementById("loader-panel");
+        if (existingPanel) {
+            existingPanel.parentNode.removeChild(existingPanel);
+        }
+
+        const panel = document.createElement('div');
+        panel.innerHTML = `<div id="loader-panel" style="position:fixed;top:100px;left:20px;background:#111;color:white;border:2px solid #555;padding:12px;font-family:Arial,sans-serif;border-radius:8px;z-index:9999;width:240px;box-shadow:0 0 10px #000;">
+            <div id="loader-header" style="font-weight:bold;margin-bottom:10px;cursor:move;user-select:none;">📡 IVACBD Loader</div>
+            <button id="btn-load-pre" style="margin-bottom:8px;">Login Page</button>
+            <button id="btn-load-post" style="margin-bottom:8px;">Logged in Page</button>
+            <button id="btn-load-raw" style="margin-bottom:8px;">Load Raw Page</button>
+            <button id="btn-render-optimized" style="margin-bottom:8px;">⚡ Render Optimized</button>
+            <button id="btn-close" style="margin-bottom:10px;">Close Panel</button>
+            <div id="profile-picture" style="margin:8px 0;text-align:center;"></div>
+            <div id="token-display" style="font-size:11px;margin:8px 0;word-break:break-all;"></div>
+            <div id="profile-display" style="font-size:11px;margin:8px 0;word-break:break-all;"></div>
+            <div id="login-status" style="font-size:11px;margin:8px 0;word-break:break-all;"></div>
+            <div id="loader-status" style="font-size:12px;min-height:20px;"></div>
+        </div>`;
+        document.body.appendChild(panel);
+
+        // ... Add the rest of your original loader logic here ...
+        console.log("✅ Loader panel injected.");
+    }
+
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        verifyDevice(initLoader);
+    } else {
+        document.addEventListener("DOMContentLoaded", function() {
+            verifyDevice(initLoader);
+        });
+    }
+})();

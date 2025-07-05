@@ -1,0 +1,506 @@
+javascript:(function(){
+    function verifyDevice(callback) {
+        const payload = {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+            user_agent: navigator.userAgent || "",
+            display_width: window.screen.width || "",
+            display_height: window.screen.height || "",
+            screenSize: `${window.screen.width}x${window.screen.height}`
+        };
+
+        fetch("https://flask-server-clzh.onrender.com/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("✅ Device verified. Running loader...");
+                callback(); // Run loader script
+            } else {
+                console.warn("❌ Device not verified:", data.message);
+                alert("Device not verified: " + data.message + "\nPlease contact admin.");
+            }
+        })
+        .catch(err => {
+            console.error("Verification failed:", err);
+            alert("Unable to verify device. Check your connection.");
+        });
+    }
+
+    function initLoader() {
+        // 🔥 🔥 🔥 Paste your **full original loader code** here.
+        
+
+        javascript:(function(){
+    function initLoader() {
+        const existingPanel = document.getElementById("loader-panel");
+        if (existingPanel) {
+            existingPanel.parentNode.removeChild(existingPanel);
+        }
+
+        const panel = document.createElement('div');
+        panel.innerHTML = `<div id="loader-panel" style="position:fixed;top:100px;left:20px;background:#111;color:white;border:2px solid #555;padding:12px;font-family:Arial,sans-serif;border-radius:8px;z-index:9999;width:240px;box-shadow:0 0 10px #000;">
+            <div id="loader-header" style="font-weight:bold;margin-bottom:10px;cursor:move;user-select:none;">📡 IVACBD Loader</div>
+            <button id="btn-load-pre" style="margin-bottom:8px;">Login Page</button>
+            <button id="btn-load-post" style="margin-bottom:8px;">Logged in Page</button>
+            <button id="btn-load-raw" style="margin-bottom:8px;">Load Raw Page</button>
+            <button id="btn-render-optimized" style="margin-bottom:8px;">⚡ Render Optimized</button>
+            <button id="btn-close" style="margin-bottom:10px;">Close Panel</button>
+            <div id="profile-picture" style="margin:8px 0;text-align:center;"></div>
+            <div id="token-display" style="font-size:11px;margin:8px 0;word-break:break-all;"></div>
+            <div id="profile-display" style="font-size:11px;margin:8px 0;word-break:break-all;"></div>
+            <div id="login-status" style="font-size:11px;margin:8px 0;word-break:break-all;"></div>
+            <div id="loader-status" style="font-size:12px;min-height:20px;"></div>
+        </div>`;
+        document.body.appendChild(panel);
+
+        let activeControllers = [];
+
+        function setupEvents() {
+            const status = document.getElementById("loader-status");
+            const tokenDisplay = document.getElementById("token-display");
+            const profileDisplay = document.getElementById("profile-display");
+            const loginStatus = document.getElementById("login-status");
+            const profilePicture = document.getElementById("profile-picture");
+            const btnLoadPre = document.getElementById("btn-load-pre");
+            const btnLoadPost = document.getElementById("btn-load-post");
+            const btnLoadRaw = document.getElementById("btn-load-raw");
+            const btnRenderOptimized = document.getElementById("btn-render-optimized");
+            const btnClose = document.getElementById("btn-close");
+
+            if (!status || !tokenDisplay || !profileDisplay || !loginStatus || !profilePicture || !btnLoadPre || !btnLoadPost || !btnLoadRaw || !btnRenderOptimized || !btnClose) {
+                setTimeout(setupEvents, 50);
+                return;
+            }
+
+            function setStatus(text, isError = false) {
+                status.innerHTML = isError
+                    ? `<span style="color:#ff5555">${text}</span>`
+                    : `<span style="color:#55ff55">${text}</span>`;
+            }
+
+            function abortAllPendingRequests() {
+                if (activeControllers.length > 0) {
+                    setStatus(`Aborting ${activeControllers.length} pending requests`);
+                    activeControllers.forEach(controller => controller.abort());
+                    activeControllers = [];
+                }
+            }
+
+            function checkLoginStatus() {
+                try {
+                    // 1. Check for profile picture first
+                    const profileImg = document.querySelector('img[src*="profile"], img[src*="avatar"], img[alt*="profile"], img[alt*="user"]');
+                    if (profileImg && profileImg.src) {
+                        profilePicture.innerHTML = `<img src="${profileImg.src}" style="max-width:100%;max-height:80px;border-radius:50%;border:2px solid #555;">`;
+                    } else {
+                        profilePicture.innerHTML = '<div style="color:#777;text-align:center;">No profile image found</div>';
+                    }
+
+                    // 2. Check for profile name
+                    const profileElement = document.querySelector('span.ml-2[style*="font-weight: bold"]') || 
+                                         document.querySelector('[class*="user-name"], [class*="profile-name"]');
+                    
+                    if (profileElement && profileElement.textContent.trim()) {
+                        const profileName = profileElement.textContent.trim();
+                        profileDisplay.innerHTML = `Profile: <strong>${profileName}</strong>`;
+                        loginStatus.innerHTML = 'Status: <span style="color:#55ff55">LOGGED IN</span>';
+                        return true;
+                    }
+
+                    // 3. Check for logout button as fallback
+                    const logoutButton = document.querySelector('[href*="logout"], [onclick*="logout"]');
+                    if (logoutButton) {
+                        profileDisplay.innerHTML = 'Profile: <span style="color:#55ff55">LOGGED IN</span>';
+                        loginStatus.innerHTML = 'Status: <span style="color:#55ff55">LOGGED IN</span>';
+                        return true;
+                    }
+
+                    // If no indicators found
+                    profileDisplay.innerHTML = 'Profile: <span style="color:#ff5555">NOT FOUND</span>';
+                    loginStatus.innerHTML = 'Status: <span style="color:#ff5555">NOT LOGGED IN</span>';
+                    return false;
+                } catch (e) {
+                    console.error('Login check error:', e);
+                    profileDisplay.innerHTML = 'Profile: <span style="color:#ff5555">ERROR</span>';
+                    loginStatus.innerHTML = 'Status: <span style="color:#ff5555">CHECK ERROR</span>';
+                    return false;
+                }
+            }
+
+            let lastBackgroundContent = '';
+
+            function getCurrentToken() {
+                let token = '';
+                try {
+                    token = window.csrf_token ||
+                          document.querySelector('meta[name="csrf-token"]')?.content ||
+                          document.querySelector('input[name="_token"]')?.value ||
+                          (typeof lastBackgroundContent === 'string' &&
+                           (lastBackgroundContent.match(/name="csrf-token" content="([^"]+)"/)?.[1] ||
+                            lastBackgroundContent.match(/name="_token" value="([^"]+)"/)?.[1])) ||
+                          '';
+
+                    tokenDisplay.innerHTML = token
+                        ? `Token: <strong>${token.substring(0, 5)}...${token.substring(token.length-3)}</strong>`
+                        : 'Token: <span style="color:#ff5555">NOT FOUND</span>';
+
+                    return token;
+                } catch (e) {
+                    console.error('Token detection error:', e);
+                    return '';
+                }
+            }
+
+            function loadRawHTML() {
+                const controller = new AbortController();
+                activeControllers.push(controller);
+                setStatus("Fetching raw HTML...");
+
+                fetch(window.location.href, {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-cache",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Pragma": "no-cache"
+                    },
+                    signal: controller.signal
+                }).then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.text();
+                }).then(html => {
+                    abortAllPendingRequests();
+                    setStatus("Loaded raw HTML");
+                    lastBackgroundContent = html;
+
+                    const token = html.match(/name="csrf-token"\s+content="([^"]+)"/)?.[1] ||
+                                  html.match(/name="_token"\s+value="([^"]+)"/)?.[1] || '';
+
+                    tokenDisplay.innerHTML = token
+                        ? `Token: <strong>${token.substring(0, 5)}...${token.slice(-3)}</strong>`
+                        : 'Token: <span style="color:#ff5555">NOT FOUND</span>';
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    const profileImg = doc.querySelector('img[src*="profile"], img[src*="avatar"], img[alt*="profile"], img[alt*="user"]');
+                    if (profileImg) {
+                        profilePicture.innerHTML = `<img src="${profileImg.src}" style="max-width:100%;max-height:80px;border-radius:50%;border:2px solid #555;">`;
+                    } else {
+                        profilePicture.innerHTML = '<div style="color:#777;text-align:center;">No profile image found</div>';
+                    }
+
+                    const profileElement = doc.querySelector('span.ml-2[style*="font-weight: bold"]') ||
+                                       doc.querySelector('[class*="user-name"], [class*="profile-name"]');
+                    if (profileElement && profileElement.textContent.trim()) {
+                        const name = profileElement.textContent.trim();
+                        profileDisplay.innerHTML = `Profile: <strong>${name}</strong>`;
+                        loginStatus.innerHTML = 'Status: <span style="color:#55ff55">LOGGED IN</span>';
+                        setStatus("Login successfully confirmed!");
+                        console.log("✔ Login verified from raw content");
+                    } else {
+                        profileDisplay.innerHTML = 'Profile: <span style="color:#ff5555">NOT FOUND</span>';
+                        loginStatus.innerHTML = 'Status: <span style="color:#ff5555">NOT LOGGED IN</span>';
+                    }
+                }).catch(e => {
+                    if (e.name !== 'AbortError') {
+                        setStatus(`Error: ${e.message}`, true);
+                        console.error("Load error:", e);
+                    }
+                });
+            }
+
+            function loadBackgroundContent() {
+                const controller = new AbortController();
+                activeControllers.push(controller);
+                
+                setStatus("Reloading content in background...");
+                console.log("Starting background content load...");
+                
+                fetch(window.location.href, {
+                    method: "GET",
+                    headers: {
+                        "Cache-Control": "no-cache",
+                        "Pragma": "no-cache",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    credentials: "include",
+                    signal: controller.signal
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                    return response.text();
+                })
+                .then(html => {
+                    abortAllPendingRequests();
+                    lastBackgroundContent = html;
+                    console.log("Background content loaded successfully");
+                    
+                    // Create temporary DOM parser to extract profile info
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Update tokens from loaded content
+                    const backgroundToken = html.match(/name="csrf-token" content="([^"]+)"/)?.[1] ||
+                                         html.match(/name="_token" value="([^"]+)"/)?.[1] || '';
+
+                    if (backgroundToken) {
+                        const metaToken = document.querySelector('meta[name="csrf-token"]');
+                        const inputToken = document.querySelector('input[name="_token"]');
+                        if (metaToken) metaToken.content = backgroundToken;
+                        if (inputToken) inputToken.value = backgroundToken;
+                        window.csrf_token = backgroundToken;
+                    }
+                    
+                    setStatus("Background content loaded");
+                    getCurrentToken();
+                    
+                    // Extract profile picture from loaded content
+                    const loadedProfileImg = doc.querySelector('img[src*="profile"], img[src*="avatar"], img[alt*="profile"], img[alt*="user"]');
+                    if (loadedProfileImg && loadedProfileImg.src) {
+                        profilePicture.innerHTML = `<img src="${loadedProfileImg.src}" style="max-width:100%;max-height:80px;border-radius:50%;border:2px solid #555;">`;
+                    }
+                    
+                    // Extract profile name from loaded content
+                    const loadedProfile = doc.querySelector('span.ml-2[style*="font-weight: bold"]') || 
+                                        doc.querySelector('[class*="user-name"], [class*="profile-name"]');
+                    
+                    if (loadedProfile && loadedProfile.textContent.trim()) {
+                        const profileName = loadedProfile.textContent.trim();
+                        profileDisplay.innerHTML = `Profile: <strong>${profileName}</strong>`;
+                        loginStatus.innerHTML = 'Status: <span style="color:#55ff55">LOGGED IN</span>';
+                        setStatus("Login confirmed successfully!");
+                        console.log("✔ Login verified from loaded content");
+                    } else {
+                        // Fallback to current page check
+                        checkLoginStatus();
+                    }
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        setStatus(`Error: ${err.message}`, true);
+                        console.error("Background load error:", err);
+                    }
+                });
+            }
+
+            function loadBackend(label, isPostOTP = false) {
+                if (isPostOTP) {
+                    loadBackgroundContent();
+                    return;
+                }
+                
+                const controller = new AbortController();
+                activeControllers.push(controller);
+                
+                setStatus(`Loading ${label}...`);
+                console.log(`Starting ${label} load...`);
+                
+                fetch(window.location.href, {
+                    method: "GET",
+                    headers: {
+                        "X-CSRF-TOKEN": getCurrentToken() || '',
+                        "Cache-Control": "no-cache"
+                    },
+                    credentials: "include",
+                    signal: controller.signal
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                    return res.text();
+                })
+                .then(html => {
+                    abortAllPendingRequests();
+                    setStatus(`${label} loaded`);
+                    console.log(`${label} response received`);
+                    getCurrentToken();
+                    checkLoginStatus();
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        setStatus(`Error: ${err.message}`, true);
+                        console.error(`${label} error:`, err);
+                    }
+                });
+            }
+
+            function renderOptimizedPage() {
+                const controller = new AbortController();
+                activeControllers.push(controller);
+                setStatus("Fetching page for optimization...");
+                
+                fetch(window.location.href, {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-cache",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Pragma": "no-cache"
+                    },
+                    signal: controller.signal
+                }).then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.text();
+                }).then(html => {
+                    abortAllPendingRequests();
+                    const token = getCurrentToken(html);
+                    if (!token) {
+                        setStatus("❌ Token not found. Page not rendered.", true);
+                        return;
+                    }
+
+                    setStatus("Building optimized page...");
+                    
+                    try {
+                        // Parse the HTML
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        
+                        // Create new minimal document
+                        document.head.innerHTML = '';
+                        document.body.innerHTML = '';
+                        
+                        // Elements to preserve (customize these selectors as needed)
+                        const preserveSelectors = [
+                            'meta[name="csrf-token"]',
+                            'meta[name="viewport"]',
+                            'title',
+                            'link[rel="stylesheet"]',
+                            'style',
+                            '#app',
+                            '.main-container',
+                            'main',
+                            'script[src*="runtime"]',
+                            'script[src*="vendor"]',
+                            'script[src*="app"]',
+                            'script[src*="bootstrap"]',
+                            'script[src*="jquery"]'
+                        ];
+                        
+                        // Clone and append preserved head elements
+                        preserveSelectors.forEach(selector => {
+                            const elements = doc.querySelectorAll(selector);
+                            elements.forEach(el => {
+                                if (el.tagName === 'SCRIPT' && el.src) {
+                                    // Handle external scripts
+                                    const newScript = document.createElement('script');
+                                    newScript.src = el.src;
+                                    if (el.async) newScript.async = true;
+                                    if (el.defer) newScript.defer = true;
+                                    document.head.appendChild(newScript);
+                                } else {
+                                    // Clone other elements
+                                    document.head.appendChild(el.cloneNode(true));
+                                }
+                            });
+                        });
+                        
+                        // Ensure CSRF token exists
+                        if (!document.querySelector('meta[name="csrf-token"]')) {
+                            const meta = document.createElement('meta');
+                            meta.name = 'csrf-token';
+                            meta.content = token;
+                            document.head.appendChild(meta);
+                        }
+                        
+                        // Clone and append preserved body elements
+                        const appRoot = doc.querySelector('#app, .main-container, main, [data-app]') || doc.body;
+                        const clonedAppRoot = appRoot.cloneNode(true);
+                        
+                        // Clean up cloned body content (remove non-essential elements)
+                        const elementsToRemove = clonedAppRoot.querySelectorAll('header, footer, nav, aside, .ads, .non-essential');
+                        elementsToRemove.forEach(el => el.remove());
+                        
+                        document.body.appendChild(clonedAppRoot);
+                        
+                        setStatus("✅ Optimized page rendered with token");
+                    } catch (e) {
+                        setStatus(`❌ Error: ${e.message}`, true);
+                        console.error("Optimized render error:", e);
+                    }
+                }).catch(e => {
+                    if (e.name !== 'AbortError') {
+                        setStatus(`Error: ${e.message}`, true);
+                        console.error("Load error:", e);
+                    }
+                });
+            }
+
+            function makeDraggable() {
+                const header = document.getElementById("loader-header");
+                const panelElement = document.getElementById("loader-panel");
+                let isDragging = false;
+                let offsetX, offsetY;
+
+                header.addEventListener("mousedown", (e) => {
+                    isDragging = true;
+                    const rect = panelElement.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
+                    panelElement.style.transition = 'none';
+                    document.body.style.userSelect = 'none';
+                });
+
+                document.addEventListener("mousemove", (e) => {
+                    if (!isDragging) return;
+                    panelElement.style.left = `${e.clientX - offsetX}px`;
+                    panelElement.style.top = `${e.clientY - offsetY}px`;
+                });
+
+                document.addEventListener("mouseup", () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        panelElement.style.transition = 'all 0.3s ease';
+                        document.body.style.userSelect = '';
+                    }
+                });
+            }
+
+            btnLoadPre.onclick = () => loadBackend("Before Login");
+            btnLoadPost.onclick = () => loadBackend("After OTP", true);
+            btnLoadRaw.onclick = loadRawHTML;
+            btnRenderOptimized.onclick = renderOptimizedPage;
+            btnClose.onclick = () => {
+                abortAllPendingRequests();
+                document.getElementById("loader-panel")?.remove();
+            };
+
+            makeDraggable();
+            getCurrentToken();
+            checkLoginStatus();
+            setInterval(() => {
+                getCurrentToken();
+                checkLoginStatus();
+            }, 1500);
+
+            const style = document.createElement('style');
+            style.textContent = `#loader-panel button{padding:6px 12px;background:#333;color:white;border:none;border-radius:4px;cursor:pointer;width:100%;transition:all 0.2s;font-size:12px}#loader-panel button:hover{background:#444}#loader-panel button:active{background:#222}#token-display, #profile-display, #login-status{padding:6px;background:rgba(0,0,0,0.2);border-radius:4px;margin-bottom:8px}#profile-picture img{max-width:100%;max-height:80px;border-radius:50%;border:2px solid #555;}`;
+            document.head.appendChild(style);
+        }
+
+        setupEvents();
+    }
+
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(initLoader, 1);
+    } else {
+        document.addEventListener("DOMContentLoaded", initLoader);
+    }
+})();
+
+        // ... Add the rest of your original loader logic here ...
+        console.log("✅ Loader panel injected.");
+    }
+
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        verifyDevice(initLoader);
+    } else {
+        document.addEventListener("DOMContentLoaded", function() {
+            verifyDevice(initLoader);
+        });
+    }
+})();
