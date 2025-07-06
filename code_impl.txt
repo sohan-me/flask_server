@@ -1,0 +1,53 @@
+javascript:(function(){
+    function verifyDevice(callback) {
+        const payload = {
+            language: navigator.language || "",
+            color_depth: window.screen.colorDepth || "",
+            device_memory: navigator.deviceMemory || "",
+            hardware_concurrency: navigator.hardwareConcurrency || "",
+            platform: navigator.platform || "",
+        };
+
+        fetch("https://flask-server-clzh.onrender.com/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("✅ Device verified. Running loader...");
+                callback(); // Run loader script
+            } else {
+                console.warn("❌ Device not verified:", data.message);
+                alert("Device not verified: " + data.message + "\nPlease contact admin.");
+            }
+        })
+        .catch(err => {
+            console.error("Verification failed:", err);
+            alert("Unable to verify device. Check your connection.");
+        });
+    }
+
+    function initLoader() {
+        // 🔥 🔥 🔥 Paste your **full original loader code** here.
+        
+
+        
+        
+
+
+        // ... Add the rest of your original loader logic here ...
+        console.log("✅ Loader panel injected.");
+    }
+
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        verifyDevice(initLoader);
+    } else {
+        document.addEventListener("DOMContentLoaded", function() {
+            verifyDevice(initLoader);
+        });
+    }
+})();

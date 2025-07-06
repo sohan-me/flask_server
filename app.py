@@ -84,8 +84,10 @@ def register_page():
         signature = generate_signature(user_data)
 
         db = load_db()
+
         if signature in db["users"]:
-            return render_template("register.html", message="User already registered.")
+            return render_template("register.html", message="Browser already registered.")
+
 
         db["users"][signature] = {
             **user_data,
