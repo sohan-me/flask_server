@@ -51,6 +51,11 @@
           <th>#</th>
           <th>Username</th>
           <th>Signature</th>
+          <th>Language</th>
+          <th>Color Depth</th>
+          <th>Device Memory</th>
+          <th>Hardware Concurrency</th>
+          <th>Platform</th>
           <th>Screen Size</th>
           <th>Registered At</th>
           <th>Expires</th>
@@ -64,6 +69,11 @@
           <td>{{ loop.index }}</td>
           <td>{{ user.username }}</td>
           <td>{{ user.signature }}</td>
+          <td>{{ user.language }}</td>
+          <td>{{ user.color_depth }}</td>
+          <td>{{ user.device_memory }}</td>
+          <td>{{ user.hardware_concurrency }}</td>
+          <td>{{ user.platform }}</td>
           <td>{{ user.screenSize }}</td>
           <td>{{ user.created }}</td>
           <td>{{ user.expires or '-' }}</td>

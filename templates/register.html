@@ -41,11 +41,12 @@
       <input name="username" placeholder="Enter User Name" required />
 
       <!-- Hidden inputs to be filled dynamically -->
-      <input type="hidden" name="timezone" id="timezone" />
-      <input type="hidden" name="user_agent" id="user_agent" />
-      <input type="hidden" name="display_width" id="display_width" />
-      <input type="hidden" name="display_height" id="display_height" />
+      <input type="hidden" name="language" id="language" />
+      <input type="hidden" name="color_depth" id="color_depth" />
       <input type="hidden" name="screenSize" id="screenSize" />
+      <input type="hidden" name="device_memory" id="device_memory" />
+      <input type="hidden" name="hardware_concurrency" id="hardware_concurrency" />
+      <input type="hidden" name="platform" id="platform" />
 
       <button type="submit">Register</button>
     </form>
@@ -55,11 +56,12 @@
     <script>
       document.getElementById("registerForm").addEventListener("submit", () => {
         // Fill hidden inputs with client info
-        document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-        document.getElementById("user_agent").value = navigator.userAgent || "";
-        document.getElementById("display_width").value = window.screen.width || "";
-        document.getElementById("display_height").value = window.screen.height || "";
-        document.getElementById("screenSize").value = `${window.screen.width}x${window.screen.height}` || "";
+        document.getElementById("language").value = navigator.language || "";
+        document.getElementById("color_depth").value = screen.colorDepth || "";
+        document.getElementById("screenSize").value = `${screen.width}x${screen.height}` || "";
+        document.getElementById("device_memory").value = navigator.deviceMemory || "";
+        document.getElementById("hardware_concurrency").value = navigator.hardwareConcurrency || "";
+        document.getElementById("platform").value = navigator.platform || "";
       });
     </script>
   </body>

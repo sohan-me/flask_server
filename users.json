@@ -1,19 +1,33 @@
 {
     "users": {
-        "53c8b913f3b1a9b0bd4d860cdb2910fb0a2c58afa5887cc8420c890bd7a918e3": {
-            "username": "sohan",
-            "timezone": "Asia/Dhaka",
-            "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-            "display_width": "2560",
-            "display_height": "1440",
+        "4d10876c8f3b311c74ee48559456af3ebb4eb29022981b993a3fb09bb5cbc3c3": {
+            "username": "Sohan",
+            "language": "en-US",
+            "color_depth": "24",
             "screenSize": "2560x1440",
-            "registered_at": "2025-07-06T03:36:52.069073",
-            "expires": "2026-07-06T03:37:21.469849",
+            "device_memory": "2",
+            "hardware_concurrency": "2",
+            "platform": "Linux x86_64",
+            "registered_at": "2025-07-07T01:25:46.523125",
+            "expires": "2026-07-07T01:25:54.583913",
+            "active": true
+        },
+        "1a043a95078e4cfa948145de91fe5ebac34411fe1ac8ab3b9d6ee561a7c0c5f1": {
+            "username": "noob",
+            "language": "en-US",
+            "color_depth": "24",
+            "screenSize": "1920x1080",
+            "device_memory": "8",
+            "hardware_concurrency": "4",
+            "platform": "Linux x86_64",
+            "registered_at": "2025-07-07T01:28:14.789246",
+            "expires": "2026-07-07T01:28:22.283376",
             "active": true
         }
     },
     "active": {
-        "53c8b913f3b1a9b0bd4d860cdb2910fb0a2c58afa5887cc8420c890bd7a918e3": true
+        "4d10876c8f3b311c74ee48559456af3ebb4eb29022981b993a3fb09bb5cbc3c3": true,
+        "1a043a95078e4cfa948145de91fe5ebac34411fe1ac8ab3b9d6ee561a7c0c5f1": true
     },
     "admin": {
         "admin": "47160e0d11596ee249f36f77a0b0615a7e7bda87a06d26d9f0fa23c841eb6920"

@@ -29,7 +29,7 @@ def save_db(data):
 
 
 def generate_signature(user_data):
-    data_str = f"{user_data.get('timezone','')}{user_data.get('user_agent','')}{user_data.get('display_width','')}{user_data.get('display_height','')}"
+    data_str = f"{user_data.get('language','')}{user_data.get('color_depth','')}{user_data.get('device_memory','')}{user_data.get('hardware_concurrency','')}{user_data.get('platform','')}"
     return hashlib.sha256(data_str.encode()).hexdigest()
 
 
@@ -62,22 +62,24 @@ def home():
 def register_page():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
-        timezone = request.form.get("timezone", "")
-        user_agent = request.form.get("user_agent", "")
-        display_width = request.form.get("display_width", "")
-        display_height = request.form.get("display_height", "")
+        language = request.form.get("language", "")
+        color_depth = request.form.get("color_depth", "")
         screenSize = request.form.get("screenSize", "")
+        device_memory = request.form.get("device_memory", "")
+        hardware_concurrency = request.form.get("hardware_concurrency", "")
+        platform = request.form.get("platform", "")
 
         if not username:
             return render_template("register.html", message="Username is required!")
 
         user_data = {
             "username": username,
-            "timezone": timezone,
-            "user_agent": user_agent,
-            "display_width": display_width,
-            "display_height": display_height,
+            "language": language,
+            "color_depth": color_depth,
             "screenSize": screenSize,
+            "device_memory": device_memory,
+            "hardware_concurrency": hardware_concurrency,
+            "platform": platform,
         }
         signature = generate_signature(user_data)
 
@@ -96,7 +98,6 @@ def register_page():
         return render_template("register.html", message="Registration successful! Please contact admin to activate your account.")
 
     return render_template("register.html", message=None)
-
 
 
 # Admin login page
@@ -129,6 +130,11 @@ def admin_dashboard():
         users_list.append({
             "username": u.get("username", "N/A"),
             "signature": signature,
+            "language": u.get("language", "N/A"),
+            "color_depth": u.get("color_depth", "N/A"),
+            "device_memory": u.get("device_memory", "N/A"),
+            "hardware_concurrency": u.get("hardware_concurrency", "N/A"),
+            "platform": u.get("platform", "N/A"),
             "screenSize": u.get("screenSize", "N/A"),
             "created": u.get("registered_at", "N/A"),
             "expires": u.get("expires", "N/A"),
