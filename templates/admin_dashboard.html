@@ -16,15 +16,29 @@
         margin-top: 20px;
       }
       th, td {
-        border: 1px solid white;
+        border: 1px solid #444;
         padding: 8px;
         text-align: center;
+      }
+      th {
+        background-color: #333;
+      }
+      tr:nth-child(even) {
+        background-color: #222;
+      }
+      tr:hover {
+        background-color: #333;
       }
       button {
         padding: 5px 10px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        margin: 2px;
+        transition: all 0.3s;
+      }
+      button:hover {
+        opacity: 0.8;
       }
       .activate-btn {
         background-color: #4caf50;
@@ -34,10 +48,26 @@
         background-color: #f44336;
         color: white;
       }
+      .delete-btn {
+        background-color: #ff5722;
+        color: white;
+      }
       a.logout {
         color: white;
         float: right;
         margin-bottom: 10px;
+        text-decoration: none;
+        padding: 5px 10px;
+        background-color: #333;
+        border-radius: 5px;
+      }
+      a.logout:hover {
+        background-color: #444;
+      }
+      .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
       }
     </style>
   </head>
@@ -68,7 +98,7 @@
         <tr>
           <td>{{ loop.index }}</td>
           <td>{{ user.username }}</td>
-          <td>{{ user.signature }}</td>
+          <td style="word-break: break-all; max-width: 200px;">{{ user.signature }}</td>
           <td>{{ user.language }}</td>
           <td>{{ user.color_depth }}</td>
           <td>{{ user.device_memory }}</td>
@@ -79,11 +109,18 @@
           <td>{{ user.expires or '-' }}</td>
           <td>{{ 'Active' if user.active else 'Inactive' }}</td>
           <td>
-            <form action="{{ url_for('admin_toggle_user', signature=user.signature) }}" method="post" style="display:inline;">
-              <button type="submit" class="{{ 'deactivate-btn' if user.active else 'activate-btn' }}">
-                {{ 'Deactivate' if user.active else 'Activate' }}
-              </button>
-            </form>
+            <div class="action-buttons">
+              <form action="{{ url_for('admin_toggle_user', signature=user.signature) }}" method="post" style="display:inline;">
+                <button type="submit" class="{{ 'deactivate-btn' if user.active else 'activate-btn' }}">
+                  {{ 'Deactivate' if user.active else 'Activate' }}
+                </button>
+              </form>
+              <form action="{{ url_for('admin_remove_user', signature=user.signature) }}" method="post" style="display:inline;">
+                <button type="submit" class="delete-btn">
+                  Delete
+                </button>
+              </form>
+            </div>
           </td>
         </tr>
         {% endfor %}

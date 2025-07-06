@@ -169,6 +169,23 @@ def admin_toggle_user(signature):
     return redirect(url_for("admin_dashboard"))
 
 
+@app.route("/admin/remove/<signature>", methods=["POST"])
+def admin_remove_user(signature):
+    if not session.get("admin_logged_in"):
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    db = load_db()
+    if signature not in db["users"]:
+        return jsonify({"success": False, "error": "User not found"})
+
+    # Remove user from both collections
+    db["users"].pop(signature, None)
+    db["active"].pop(signature, None)
+    
+    save_db(db)
+    return redirect(url_for("admin_dashboard"))
+
+
 # Admin logout
 @app.route("/admin/logout")
 def admin_logout():
