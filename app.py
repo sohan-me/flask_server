@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-CORS(app)
+CORS(app, resources={r"/verify": {"origins": "https://payment.ivacbd.com"}})
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 

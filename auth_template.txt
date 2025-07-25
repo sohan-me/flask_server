@@ -1,65 +1,97 @@
-javascript:(function(){
-    function getWebGLFingerprint() {
-        try {
-            var canvas = document.createElement('canvas');
-            var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (!gl) return "unsupported";
-            var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            if (!debugInfo) return "unavailable";
-            var vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-            var renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-            return vendor + '~' + renderer;
-        } catch (e) {
-            return "error";
-        }
-    }
+javascript:(function () {
+    'use strict';
 
-    function verifyDevice(callback) {
-        const payload = {
+    const getDeviceFingerprint = () => {
+        let webgl = "unknown";
+
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) {
+                    const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    webgl = vendor + '~' + renderer;
+                } else {
+                    webgl = "unavailable";
+                }
+            } else {
+                webgl = "unsupported";
+            }
+        } catch (e) {
+            webgl = "error";
+        }
+
+        return {
             language: navigator.language || "",
             color_depth: window.screen.colorDepth || "",
             device_memory: navigator.deviceMemory || "",
             hardware_concurrency: navigator.hardwareConcurrency || "",
             platform: navigator.platform || "",
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-            webgl_fingerprint: getWebGLFingerprint()
+            webgl_fingerprint: webgl
         };
+    };
 
-        fetch("https://flask-server-clzh.onrender.com/verify", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                console.log("✅ Device verified. Running loader...");
-                callback(); // Run loader script
-            } else {
-                console.warn("❌ Device not verified:", data.message);
-                alert("Device not verified: " + data.message + "\nPlease contact admin.");
+    // ========================
+    // Verification System
+    // ========================
+    const verifyDevice = async (successCallback) => {
+        const API_ENDPOINT = "https://flask-server-clzh.onrender.com/verify";
+        const fingerprint = getDeviceFingerprint();
+
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: "POST",
+                mode: "cors",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: JSON.stringify(fingerprint)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        })
-        .catch(err => {
-            console.error("Verification failed:", err);
-            alert("Unable to verify device. Check your connection.");
-        });
-    }
 
-    function initLoader() {
-        // 🔥 🔥 🔥 Paste your **full original loader code** here.
+            const data = await response.json();
 
+            if (data.status === "success") {
+                console.log("✅ Verification successful", data);
+                successCallback();
+            } else {
+                console.warn("❌ Verification failed:", data.message);
+                alert(`Verification failed: ${data.message || "Unknown error"}`);
+            }
+        } catch (error) {
+            console.error("⚠️ Verification error:", error);
+            alert(`Connection error: ${error.message}. Please try again later.`);
+        }
+    };
+
+    // ========================
+    // Loader Initialization
+    // ========================
+    const initLoader = () => {
+        // ********** PASTE YOUR LOADER CODE HERE **********
         
-        console.log("✅ Loader panel injected.");
-    }
+        console.log("✅ Loader initialized");
+        // ************************************************
+    };
 
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-        verifyDevice(initLoader);
-    } else {
-        document.addEventListener("DOMContentLoaded", function() {
+    // ========================
+    // Execution Controller
+    // ========================
+    const main = () => {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", () => verifyDevice(initLoader));
+        } else {
             verifyDevice(initLoader);
-        });
-    }
+        }
+    };
+
+    main();
 })();
