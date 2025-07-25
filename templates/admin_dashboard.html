@@ -19,6 +19,7 @@
         border: 1px solid #444;
         padding: 8px;
         text-align: center;
+        vertical-align: middle;
       }
       th {
         background-color: #333;
@@ -53,27 +54,81 @@
         color: white;
       }
       a.logout {
-        color: white;
+        color: #fff;
         float: right;
         margin-bottom: 10px;
         text-decoration: none;
-        padding: 5px 10px;
-        background-color: #333;
-        border-radius: 5px;
+        padding: 10px 32px;
+        background-color: #2196F3;
+        border-radius: 6px;
+        font-size: 1.1em;
+        font-weight: 500;
+        box-shadow: 0 2px 8px #0003;
+        transition: background 0.2s, color 0.2s;
       }
       a.logout:hover {
-        background-color: #444;
+        background-color: #1976D2;
+        color: #e3f2fd;
       }
       .action-buttons {
         display: flex;
         justify-content: center;
         gap: 5px;
       }
+      .truncated {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        color: #4fc3f7;
+        transition: color 0.2s;
+      }
+      .truncated:hover {
+        color: #90caf9;
+        text-decoration: underline;
+      }
+      .popup-bg {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .popup-bg.active {
+        display: flex;
+      }
+      .popup-content {
+        background: #222;
+        color: #fff;
+        padding: 30px 40px;
+        border-radius: 10px;
+        max-width: 90vw;
+        max-height: 70vh;
+        overflow: auto;
+        box-shadow: 0 2px 16px #000a;
+        font-size: 1.1em;
+        word-break: break-all;
+        position: relative;
+      }
+      .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 18px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5em;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <a href="{{ url_for('admin_logout') }}" class="logout">Logout</a>
-    <h2>Admin Dashboard - User Management</h2>
+    <h2 style="color:#2196F3; margin-bottom: 0.5em;">Admin Dashboard - User Management</h2>
+    <p style="color:#2196F3; font-size:1.1em; margin-bottom:20px;">Welcome, {{ session['admin_username'] }}! Manage registered users below.</p>
 
     <table>
       <thead>
@@ -87,6 +142,8 @@
           <th>Hardware Concurrency</th>
           <th>Platform</th>
           <th>Screen Size</th>
+          <th>Timezone</th>
+          <th>WebGL Fingerprint</th>
           <th>Registered At</th>
           <th>Expires</th>
           <th>Status</th>
@@ -98,13 +155,15 @@
         <tr>
           <td>{{ loop.index }}</td>
           <td>{{ user.username }}</td>
-          <td style="word-break: break-all; max-width: 200px;">{{ user.signature }}</td>
+          <td class="truncated" onclick="showPopup(this)" title="Click to view full text">{{ user.signature }}</td>
           <td>{{ user.language }}</td>
           <td>{{ user.color_depth }}</td>
           <td>{{ user.device_memory }}</td>
           <td>{{ user.hardware_concurrency }}</td>
           <td>{{ user.platform }}</td>
           <td>{{ user.screenSize }}</td>
+          <td>{{ user.timezone or '-' }}</td>
+          <td class="truncated" onclick="showPopup(this)" title="Click to view full text">{{ user.webgl_fingerprint or '-' }}</td>
           <td>{{ user.created }}</td>
           <td>{{ user.expires or '-' }}</td>
           <td>{{ 'Active' if user.active else 'Inactive' }}</td>
@@ -126,5 +185,25 @@
         {% endfor %}
       </tbody>
     </table>
+    <div class="popup-bg" id="popupBg">
+      <div class="popup-content">
+        <button class="popup-close" onclick="closePopup()">&times;</button>
+        <div id="popupText"></div>
+      </div>
+    </div>
+    <script>
+      function showPopup(cell) {
+        var text = cell.textContent;
+        document.getElementById('popupText').textContent = text;
+        document.getElementById('popupBg').classList.add('active');
+      }
+      function closePopup() {
+        document.getElementById('popupBg').classList.remove('active');
+      }
+      // Optional: close popup on background click
+      document.getElementById('popupBg').addEventListener('click', function(e) {
+        if (e.target === this) closePopup();
+      });
+    </script>
   </body>
 </html>

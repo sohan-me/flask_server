@@ -1,4 +1,19 @@
 javascript:(function(){
+    function getWebGLFingerprint() {
+        try {
+            var canvas = document.createElement('canvas');
+            var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return "unsupported";
+            var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (!debugInfo) return "unavailable";
+            var vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+            var renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            return vendor + '~' + renderer;
+        } catch (e) {
+            return "error";
+        }
+    }
+
     function verifyDevice(callback) {
         const payload = {
             language: navigator.language || "",
@@ -6,6 +21,8 @@ javascript:(function(){
             device_memory: navigator.deviceMemory || "",
             hardware_concurrency: navigator.hardwareConcurrency || "",
             platform: navigator.platform || "",
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+            webgl_fingerprint: getWebGLFingerprint()
         };
 
         fetch("https://flask-server-clzh.onrender.com/verify", {
@@ -33,13 +50,8 @@ javascript:(function(){
 
     function initLoader() {
         // 🔥 🔥 🔥 Paste your **full original loader code** here.
-        
 
         
-        
-
-
-        // ... Add the rest of your original loader logic here ...
         console.log("✅ Loader panel injected.");
     }
 

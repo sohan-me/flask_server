@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timedelta
 from functools import wraps
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 
 load_dotenv()
 
@@ -17,6 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CORS(app)
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # ---------------- Database Models ---------------- #
 class User(db.Model):
@@ -30,6 +32,8 @@ class User(db.Model):
     device_memory = db.Column(db.String(10))
     hardware_concurrency = db.Column(db.String(10))
     platform = db.Column(db.String(50))
+    timezone = db.Column(db.String(50), nullable=True)
+    webgl_fingerprint = db.Column(db.String(255))
     registered_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires = db.Column(db.DateTime)
     active = db.Column(db.Boolean, default=False)
@@ -44,7 +48,7 @@ class Admin(db.Model):
 
 # ---------------- Utility Functions ---------------- #
 def generate_signature(user_data):
-    data_str = f"{user_data.get('language','')}{user_data.get('color_depth','')}{user_data.get('device_memory','')}{user_data.get('hardware_concurrency','')}{user_data.get('platform','')}"
+    data_str = f"{user_data.get('language','')}{user_data.get('color_depth','')}{user_data.get('device_memory','')}{user_data.get('hardware_concurrency','')}{user_data.get('platform','')}{user_data.get('timezone','')}{user_data.get('webgl_fingerprint','')}"
     return hashlib.sha256(data_str.encode()).hexdigest()
 
 def hash_password(password):
@@ -81,6 +85,11 @@ def register_page():
         device_memory = request.form.get("device_memory", "")
         hardware_concurrency = request.form.get("hardware_concurrency", "")
         platform = request.form.get("platform", "")
+        timezone = request.form.get("timezone", "")
+        webgl_fingerprint = request.form.get("webgl_fingerprint", "")
+        
+        print(timezone)
+        print(webgl_fingerprint)
 
         if not username:
             return render_template("register.html", message="Username is required!")
@@ -93,6 +102,8 @@ def register_page():
             "device_memory": device_memory,
             "hardware_concurrency": hardware_concurrency,
             "platform": platform,
+            "timezone": timezone,
+            "webgl_fingerprint": webgl_fingerprint,
         }
         signature = generate_signature(user_data)
 
@@ -113,6 +124,8 @@ def register_page():
             device_memory=device_memory,
             hardware_concurrency=hardware_concurrency,
             platform=platform,
+            timezone=timezone,
+            webgl_fingerprint=webgl_fingerprint,
             active=False
         )
         
@@ -159,6 +172,8 @@ def admin_dashboard():
             "created": user.registered_at.isoformat(),
             "expires": user.expires.isoformat() if user.expires else None,
             "active": user.active,
+            "timezone": user.timezone,
+            "webgl_fingerprint": user.webgl_fingerprint,
         })
     
     return render_template("admin_dashboard.html", users=users_list)

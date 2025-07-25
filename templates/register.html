@@ -47,22 +47,59 @@
       <input type="hidden" name="device_memory" id="device_memory" />
       <input type="hidden" name="hardware_concurrency" id="hardware_concurrency" />
       <input type="hidden" name="platform" id="platform" />
+      <input type="hidden" name="timezone" id="timezone" />
+      <input type="hidden" name="webgl_fingerprint" id="webgl_fingerprint" />
 
       <button type="submit">Register</button>
     </form>
 
     <p>After registration, please contact admin to activate your account.</p>
 
-    <script>
-      document.getElementById("registerForm").addEventListener("submit", () => {
-        // Fill hidden inputs with client info
-        document.getElementById("language").value = navigator.language || "";
-        document.getElementById("color_depth").value = screen.colorDepth || "";
-        document.getElementById("screenSize").value = `${screen.width}x${screen.height}` || "";
-        document.getElementById("device_memory").value = navigator.deviceMemory || "";
-        document.getElementById("hardware_concurrency").value = navigator.hardwareConcurrency || "";
-        document.getElementById("platform").value = navigator.platform || "";
-      });
-    </script>
+ <script>
+  function getWebGLFingerprint() {
+    try {
+      var canvas = document.createElement('canvas');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return "unsupported";
+      var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      if (!debugInfo) return "unavailable";
+      var vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+      var renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      return vendor + '~' + renderer;
+    } catch (e) {
+      return "error";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("registerForm");
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const tzInput = document.getElementById("timezone");
+      const webglInput = document.getElementById("webgl_fingerprint");
+
+      if (!tzInput || !webglInput) {
+        alert("Hidden inputs not found in DOM!");
+        return;
+      }
+
+      document.getElementById("language").value = navigator.language || "";
+      document.getElementById("color_depth").value = screen.colorDepth || "";
+      document.getElementById("screenSize").value = `${screen.width}x${screen.height}` || "";
+      document.getElementById("device_memory").value = navigator.deviceMemory || "";
+      document.getElementById("hardware_concurrency").value = navigator.hardwareConcurrency || "";
+      document.getElementById("platform").value = navigator.platform || "";
+      tzInput.value = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      webglInput.value = getWebGLFingerprint();
+
+      setTimeout(() => {
+        event.target.submit();
+      }, 50);
+    });
+  });
+</script>
+
+
   </body>
 </html>
