@@ -48,7 +48,7 @@ class Admin(db.Model):
 
 # ---------------- Utility Functions ---------------- #
 def generate_signature(user_data):
-    data_str = f"{user_data.get('language','')}{user_data.get('color_depth','')}{user_data.get('device_memory','')}{user_data.get('hardware_concurrency','')}{user_data.get('platform','')}{user_data.get('timezone','')}{user_data.get('webgl_fingerprint','')}"
+    data_str = f"{user_data.get('language','')}{user_data.get('color_depth','')}{user_data.get('hardware_concurrency','')}{user_data.get('platform','')}{user_data.get('timezone','')}{user_data.get('webgl_fingerprint','')}"
     return hashlib.sha256(data_str.encode()).hexdigest()
 
 def hash_password(password):
@@ -87,19 +87,14 @@ def register_page():
         platform = request.form.get("platform", "")
         timezone = request.form.get("timezone", "")
         webgl_fingerprint = request.form.get("webgl_fingerprint", "")
-        
-        print(timezone)
-        print(webgl_fingerprint)
+
 
         if not username:
             return render_template("register.html", message="Username is required!")
 
         user_data = {
-            "username": username,
             "language": language,
             "color_depth": color_depth,
-            "screen_size": screen_size,
-            "device_memory": device_memory,
             "hardware_concurrency": hardware_concurrency,
             "platform": platform,
             "timezone": timezone,
@@ -231,9 +226,10 @@ def create_admin():
     return "Admin already exists"
 
 
-@app.route('/verify', methods=['POST'])
+@app.route('/verify', methods=['POST', 'OPTIONS'])
 def verify_user():
     user_data = request.json
+    print("✅ Received data:", user_data)  # Check Render logs
     signature = generate_signature(user_data)
 
     user = User.query.get(signature)

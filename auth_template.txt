@@ -1,18 +1,16 @@
-javascript:(function () {
+javascript:(function() {
     'use strict';
 
     const getDeviceFingerprint = () => {
         let webgl = "unknown";
-
         try {
             const canvas = document.createElement('canvas');
             const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
             if (gl) {
                 const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
                 if (debugInfo) {
-                    const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    webgl = vendor + '~' + renderer;
+                    webgl = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) + '~' + 
+                            gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
                 } else {
                     webgl = "unavailable";
                 }
@@ -26,72 +24,55 @@ javascript:(function () {
         return {
             language: navigator.language || "",
             color_depth: window.screen.colorDepth || "",
-            device_memory: navigator.deviceMemory || "",
             hardware_concurrency: navigator.hardwareConcurrency || "",
             platform: navigator.platform || "",
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-            webgl_fingerprint: webgl
+            webgl_fingerprint: webgl,
         };
     };
 
-    // ========================
-    // Verification System
-    // ========================
     const verifyDevice = async (successCallback) => {
-        const API_ENDPOINT = "https://flask-server-clzh.onrender.com/verify";
+        // Auto-detect environment (local vs production)
+        const API_ENDPOINT = 'https://flask-server-clzh.onrender.com/verify';
+
         const fingerprint = getDeviceFingerprint();
+        console.log('📦 Sending fingerprint:', fingerprint);
 
         try {
             const response = await fetch(API_ENDPOINT, {
-                method: "POST",
-                mode: "cors",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest"
-                },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fingerprint)
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
             const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+            }
 
             if (data.status === "success") {
                 console.log("✅ Verification successful", data);
                 successCallback();
             } else {
-                console.warn("❌ Verification failed:", data.message);
                 alert(`Verification failed: ${data.message || "Unknown error"}`);
             }
         } catch (error) {
-            console.error("⚠️ Verification error:", error);
-            alert(`Connection error: ${error.message}. Please try again later.`);
+            console.error("⚠️ Error:", error);
+            alert(`Error: ${error.message}\n\nDebug info logged to console`);
         }
     };
 
-    // ========================
-    // Loader Initialization
-    // ========================
     const initLoader = () => {
-        // ********** PASTE YOUR LOADER CODE HERE **********
-        
+        // Your loader logic here
         console.log("✅ Loader initialized");
-        // ************************************************
+        alert("Device verified successfully! Loading content...");
     };
 
-    // ========================
-    // Execution Controller
-    // ========================
-    const main = () => {
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", () => verifyDevice(initLoader));
-        } else {
-            verifyDevice(initLoader);
-        }
-    };
-
-    main();
+    // Auto-run with proper ready state handling
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => verifyDevice(initLoader));
+    } else {
+        verifyDevice(initLoader);
+    }
 })();
