@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-CORS(app, resources={r"/verify": {"origins": "https://payment.ivacbd.com"}})
+CORS(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -226,7 +226,7 @@ def create_admin():
     return "Admin already exists"
 
 
-@app.route('/verify', methods=['POST', 'OPTIONS'])
+@app.route('/verify', methods=['POST'])
 def verify_user():
     user_data = request.json
     print("✅ Received data:", user_data)  # Check Render logs
